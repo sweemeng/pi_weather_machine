@@ -19,6 +19,16 @@ Toy project to use raspberry pi sense hat with a sklearn classifier to try to pr
 3. In fact the prediction sucked
 4. It is fun though
 5. UI Controller might be a useful framework that I should extract out
+6. My ability to make a 8x8 pixel art is horrible
 
 ## Photo of it at work
 ![stupid pi trick](http://i.imgur.com/IazWK39.jpg)
+
+## To run it,
+```
+$ sudo python weather_machine.py
+```
+
+1) Move joystick up if prediction is correct. You will see a circle
+2) Down if not, you will see a cross. 
+3) THen it will present the next guess, if it is right, do 1) It will submit to the predictor for training
