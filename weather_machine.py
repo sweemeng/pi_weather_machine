@@ -11,6 +11,7 @@ import csv
 import logging
 from sklearn.ensemble import RandomForestClassifier
 import os
+import copy
 
 
 logger = logging.getLogger("Weather Machine Logger")
@@ -20,7 +21,11 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 stream_handler.setFormatter(formatter)
 stream_handler.setLevel(logging.DEBUG)
 
+file_handler = logging.FileHandler("weather.log")
+file_handler.setFormatter(formatter)
+file_handler.setLevel(logging.DEBUG)
 logger.addHandler(stream_handler)
+logger.addHandler(file_handler)
 
 SUNNY = 0
 CLOUDY = 1
@@ -50,6 +55,13 @@ class WeatherComputer(Thread):
     def run(self):
 
         self.load_data()
+        if len(self.training_data) > self.training_size:
+            self.classifier.fit(self.training_data, self.training_output)
+            self.training_done = True
+            logger.debug("Initial training complete")
+        else:
+            logger.debug("Not enough data for initial training, data size %s" % len(self.training_data))
+
         logger.debug("Thread running")
         prediction_time = time.time()
         while not self.stop_event.is_set():
@@ -58,7 +70,8 @@ class WeatherComputer(Thread):
             # Predicted answer on top, then the other at the end
             if prediction_time < time.time():
                 if self.training_done:
-                    prediction = self.classifier.predict([ data ])
+                    result = self.classifier.predict([ data ])
+                    prediction = [ int(result[0]) ]
                     if not SUNNY in prediction:
                         prediction.append(SUNNY)
                     if not CLOUDY in prediction:
@@ -83,14 +96,17 @@ class WeatherComputer(Thread):
                 if len(self.training_data) > self.training_size:
                     self.classifier.fit(self.training_data, self.training_output)
                     self.training_done = True
-                logger.debug("training complete")
-
+                    logger.debug("training complete")
+                else:
+                    logger.debug("Not enough data to train, data size %s" % len(self.training_data))
+                self.save_data()
             except Empty:
                 logger.debug("no training")
             time.sleep(0.1)
 
         logger.debug("quit")
         self.save_data()
+        time.sleep(1)
 
     def load_data(self):
         if not os.path.exists(self.data_file):
@@ -98,14 +114,22 @@ class WeatherComputer(Thread):
         with open(self.data_file, 'rb') as csv_file:
             reader = csv.reader(csv_file)
             for row in reader:
-                self.training_data.append(row)
+                self.training_data.append(row[:-1])
+                self.training_output.append(row[-1])
 
     def save_data(self):
         logger.debug("writing data to %s " % self.data_file)
         with open(self.data_file, 'wb') as csv_file:
             writer = csv.writer(csv_file)
-            for entry in self.training_data:
-                writer.writerow(entry)
+            if not self.training_data:
+                return
+            temp = zip(self.training_data, self.training_output)
+            for entry in temp:
+                x, y = entry
+                logger.debug("x:%s,y: %s" % (entry))
+                t = copy.deepcopy(x)
+                t.append(y)
+                writer.writerow(t)
 
 
 class WeatherGuy(object):
