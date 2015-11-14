@@ -19,3 +19,6 @@ Toy project to use raspberry pi sense hat with a sklearn classifier to try to pr
 3. In fact the prediction sucked
 4. It is fun though
 5. UI Controller might be a useful framework that I should extract out
+
+## Photo of it at work
+![stupid pi trick](http://i.imgur.com/IazWK39.jpg)
