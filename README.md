@@ -15,6 +15,7 @@ Toy project to use raspberry pi sense hat with a sklearn classifier to try to pr
 
 ## Note
 1. Yeah training using push button is stupid
-2. In fact the prediction sucked
-3. It is fun though
-4. UI Controller might be a useful framework that I should extract out
+2. In fact, I should really try to put that water sensor I have, and plug it to the ESP8266 that have have. To automate everything. 
+3. In fact the prediction sucked
+4. It is fun though
+5. UI Controller might be a useful framework that I should extract out
